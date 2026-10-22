@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>html{color-scheme:light}body{margin:0;font:14px system-ui,sans-serif}</style>
+<title>Tidepool</title>
+<meta name="theme-color" content="#FFF7DC">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Tidepool">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&amp;family=Nunito:wght@400;600;700;800&amp;display=swap">
+<style>
+/* Single fixed look: the app's own pastel palette, on a soft periwinkle backdrop for larger screens */
+:root { --backdrop: #C9D3F2; --app-bg: #FFF7DC; --ink: #2F3A66; --frame: #2F3A66; }
+html, body { height: 100%; }
+body { background: var(--backdrop); color: var(--ink); display: flex; align-items: center; justify-content: center; overflow: hidden; -webkit-tap-highlight-color: transparent; }
+#app { width: 390px; height: min(844px, calc(100% - 40px)); background: var(--app-bg); border-radius: 44px; overflow: hidden; box-shadow: 0 0 0 10px var(--frame), 0 30px 80px rgba(47,58,102,.35); position: relative; }
+#app * { box-sizing: border-box; }
+#app h1, #app h2 { text-wrap: balance; }
+@media (max-width: 520px), (max-height: 700px) and (max-width: 900px) {
+  body { background: var(--app-bg); display: block; }
+  #app { width: 100%; height: 100%; border-radius: 0; box-shadow: none; }
+}
+
+body{margin:0}
+a{color:#4A5FA8}a:hover{color:#2F3A66}
+button{font-family:inherit;cursor:pointer}
+.swim{animation-name:swim;animation-timing-function:ease-in-out;animation-iteration-count:infinite}
+.drift{animation-name:drift;animation-timing-function:ease-in-out;animation-iteration-count:infinite}
+.bob{animation:bob 3.2s ease-in-out infinite}
+.sway{transform-origin:bottom center;animation:sway 5s ease-in-out infinite}
+.rise{animation:rise 7s linear infinite}
+.fall{animation:fall 2.4s ease-in forwards}
+.breathe{animation:breathe 8s ease-in-out infinite}
+.in-txt{animation:inTxt 8s linear infinite}
+.out-txt{animation:outTxt 8s linear infinite}
+.pop{animation:pop .35s ease-out}
+@keyframes swim{0%{transform:translateX(0) scaleX(1)}48%{transform:translateX(150px) scaleX(1)}50%{transform:translateX(150px) scaleX(-1)}98%{transform:translateX(0) scaleX(-1)}100%{transform:translateX(0) scaleX(1)}}
+@keyframes drift{0%,100%{transform:translate(0,0)}50%{transform:translate(40px,-26px)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes sway{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+@keyframes rise{0%{transform:translateY(0);opacity:0}10%{opacity:.8}100%{transform:translateY(-360px);opacity:0}}
+@keyframes fall{0%{transform:translateY(0);opacity:1}100%{transform:translateY(150px);opacity:0}}
+@keyframes breathe{0%,100%{transform:scale(.72)}50%{transform:scale(1.08)}}
+@keyframes inTxt{0%,46%{opacity:1}50%,96%{opacity:0}100%{opacity:1}}
+@keyframes outTxt{0%,46%{opacity:0}50%,96%{opacity:1}100%{opacity:0}}
+@keyframes pop{0%{transform:scale(.9);opacity:0}100%{transform:scale(1);opacity:1}}
+@media (prefers-reduced-motion: reduce){.swim,.drift,.bob,.sway,.rise,.breathe,.fall{animation:none}.in-txt,.out-txt{animation:none}}
+textarea:focus,input:focus,button:focus-visible,a:focus-visible{outline:3px solid #FF8FC0;outline-offset:2px}
+
+button { touch-action: manipulation; }
+</style>
+</head>
+<body>
+
+<div id="app" role="application" aria-label="Tidepool app prototype"></div>
+<template id="tpl">
+
+<div style="width: 100%; height: 100%; position: relative; overflow: hidden; background: #FFF7DC; font-family: 'Nunito', system-ui, sans-serif; color: #2F3A66; display: flex; flex-direction: column">
+
+
+<sc-if value="{{isWelcome}}" hint-placeholder-val="{{true}}">
+<div style="flex: 1; min-height: 0; position: relative; overflow-x: hidden; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding: 24px 28px 28px; box-sizing: border-box">
+<svg aria-hidden="true" width="150" height="88" viewBox="0 0 190 110" style="position: absolute; top: 18px; right: -18px; z-index: 0"><path d="M10 40 C 20 110, 120 100, 100 50 C 85 15, 50 50, 90 75 C 130 100, 175 70, 185 20" fill="none" stroke="#DCE6FB" stroke-width="12" stroke-linecap="round"></path></svg>
+<div style="flex: 1 0 24px"></div>
+<div style="position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; width: 100%">
+<div style="background: #FFB3D6; border-radius: 999px; padding: 10px 34px; font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: 26px; letter-spacing: 3px; color: #6B2350">TIDEPOOL</div>
+<div style="position: relative; margin-top: 16px; padding: 0 26px">
+<svg aria-hidden="true" width="30" height="33" viewBox="0 0 40 44" style="position: absolute; left: 0; top: -6px"><path d="M20 0 C 22 16, 26 20, 40 22 C 26 24, 22 28, 20 44 C 18 28, 14 24, 0 22 C 14 20, 18 16, 20 0 Z" fill="#FF9CC8"></path></svg>
+<h1 style="margin: 0; font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: 54px; line-height: 1.05; color: #5B73C2; letter-spacing: 1px">WELCOME</h1>
+</div>
+<p style="margin: 12px 0 28px; font-size: 17px; line-height: 1.5; text-align: center; color: #3E4C7A; max-width: 280px">A calm little corner for looking after yourself, one gentle step at a time.</p>
+<button onClick="{{goIntro}}" style="width: 100%; max-width: 300px; min-height: 60px; padding: 12px 16px; background: #DCE6FB; border: 0; border-radius: 14px; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 18px; line-height: 1.3; letter-spacing: 1.5px; color: #3B55A6">TAP HERE TO GET STARTED</button>
+</div>
+<div style="flex: 1 0 16px"></div>
+<svg aria-hidden="true" width="96" height="126" viewBox="0 0 130 170" style="flex: none; align-self: flex-end; margin-right: 24px; position: relative; z-index: 0"><path d="M60 170 C 58 130, 70 100, 62 70" stroke="#93ABE3" stroke-width="7" fill="none" stroke-linecap="round"></path><path d="M62 120 C 85 100, 110 110, 112 118 C 95 132, 75 128, 62 120 Z" fill="#93ABE3"></path><path d="M60 140 C 40 122, 18 130, 16 138 C 32 150, 50 148, 60 140 Z" fill="#93ABE3"></path><g transform="translate(62 46)"><ellipse cx="0" cy="0" rx="34" ry="22" fill="#FFB3D6"></ellipse><path d="M-34 0 L -52 -14 L -52 14 Z" fill="#FFB3D6"></path><circle cx="18" cy="-5" r="4" fill="#3E4C7A"></circle></g></svg>
+</div>
+</sc-if>
+
+
+<sc-if value="{{isIntro}}" hint-placeholder-val="{{false}}">
+<div style="flex: 1; min-height: 0; display: flex; flex-direction: column">
+<div style="flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; padding: 32px 24px 16px; box-sizing: border-box; gap: 16px">
+<p style="margin: 0; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 15px; letter-spacing: 2px; color: #A13A72">HOW TIDEPOOL WORKS</p>
+<h1 style="margin: 0; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 29px; line-height: 1.15; color: #2F3A66">Your tide pool grows when you look after yourself.</h1>
+<div style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px">
+<div style="background: #FFFFFF; border-radius: 20px; padding: 16px 18px; display: flex; gap: 14px; align-items: flex-start">
+<div style="width: 44px; height: 44px; flex: none; border-radius: 14px; background: #DCE6FB; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3B55A6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12c3-5 9-6 13-2l5-3v10l-5-3c-4 4-10 3-13-2z"></path><circle cx="9" cy="11" r="0.6"></circle></svg></div>
+<div><div style="font-weight: 800; font-size: 16px">Small steps, real rewards</div><div style="font-size: 15px; line-height: 1.45; color: #4A5578; margin-top: 2px">Check-ins, coping exercises, shared meals and breaks all add something new to your pool.</div></div>
+</div>
+<div style="background: #FFFFFF; border-radius: 20px; padding: 16px 18px; display: flex; gap: 14px; align-items: flex-start">
+<div style="width: 44px; height: 44px; flex: none; border-radius: 14px; background: #FFE1EE; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#A13A72" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10z"></path></svg></div>
+<div><div style="font-weight: 800; font-size: 16px">No streaks. No penalties.</div><div style="font-size: 15px; line-height: 1.45; color: #4A5578; margin-top: 2px">Missed a day? Nothing is lost. Your fish wait for you, and nobody is ranking you.</div></div>
+</div>
+<div style="background: #FFFFFF; border-radius: 20px; padding: 16px 18px; display: flex; gap: 14px; align-items: flex-start">
+<div style="width: 44px; height: 44px; flex: none; border-radius: 14px; background: #E3F6EE; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1F6E55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="14" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg></div>
+<div><div style="font-weight: 800; font-size: 16px">You choose what's shared</div><div style="font-size: 15px; line-height: 1.45; color: #4A5578; margin-top: 2px">Your journal stays private unless you decide to share it with your care team.</div></div>
+</div>
+</div>
+</div>
+<div style="flex: none; padding: 12px 24px 24px; background: #FFF7DC; border-top: 1px solid #F0E6C8; display: flex; flex-direction: column">
+<button onClick="{{goHome}}" style="min-height: 56px; border: 0; border-radius: 18px; background: #5068B5; color: #FFFFFF; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 19px">Meet my tide pool</button>
+</div>
+</div>
+</sc-if>
+
+
+<sc-if value="{{isHome}}" hint-placeholder-val="{{false}}">
+<div style="flex: 1; overflow-y: auto; overflow-x: hidden">
+<div style="position: relative; height: 420px; overflow: hidden; background: {{waterBg}}; border-radius: 0 0 32px 32px">
+<sc-if value="{{showRays}}" hint-placeholder-val="{{true}}">
+<div aria-hidden="true" style="position: absolute; top: -60px; left: 150px; width: 46px; height: 420px; background: rgba(255,255,255,0.16); transform: rotate(-22deg)"></div>
+<div aria-hidden="true" style="position: absolute; top: -60px; left: 230px; width: 26px; height: 420px; background: rgba(255,255,255,0.13); transform: rotate(-22deg)"></div>
+<div aria-hidden="true" style="position: absolute; top: -60px; left: 290px; width: 60px; height: 420px; background: rgba(255,255,255,0.10); transform: rotate(-22deg)"></div>
+</sc-if>
+<sc-if value="{{calm}}" hint-placeholder-val="{{false}}">
+<div aria-hidden="true" style="position: absolute; top: 74px; right: 40px; width: 54px; height: 54px; border-radius: 50%; background: #FFF6D8; box-shadow: 0 0 40px 18px rgba(255,246,216,0.35)"></div>
+</sc-if>
+<div aria-hidden="true" class="rise" style="position: absolute; bottom: 60px; left: 60px; width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.8)"></div>
+<div aria-hidden="true" class="rise" style="position: absolute; bottom: 40px; left: 300px; width: 6px; height: 6px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.8); animation-delay: -3s"></div>
+<div aria-hidden="true" class="rise" style="position: absolute; bottom: 80px; left: 210px; width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.7); animation-delay: -5s"></div>
+
+<svg aria-hidden="true" class="sway" width="60" height="230" viewBox="0 0 60 230" style="position: absolute; bottom: 30px; left: -6px"><path d="M30 230 C 10 180, 50 140, 26 90 C 10 55, 40 30, 30 0" stroke="#5FC4A0" stroke-width="10" fill="none" stroke-linecap="round"></path><path d="M30 150 C 50 140, 58 120, 56 110" stroke="#5FC4A0" stroke-width="7" fill="none" stroke-linecap="round"></path><path d="M24 80 C 6 70, 2 54, 4 46" stroke="#5FC4A0" stroke-width="7" fill="none" stroke-linecap="round"></path></svg>
+<svg aria-hidden="true" class="sway" width="50" height="180" viewBox="0 0 50 180" style="position: absolute; bottom: 30px; right: 4px; animation-delay: -2s"><path d="M25 180 C 40 140, 8 110, 26 70 C 38 44, 14 22, 24 0" stroke="#7FD6B4" stroke-width="9" fill="none" stroke-linecap="round"></path></svg>
+
+<sc-for list="{{fishList}}" as="f" hint-placeholder-count="4">
+<div class="{{f.cls}}" style="position: absolute; top: {{f.top}}; left: {{f.left}}; animation-duration: {{f.dur}}; animation-delay: {{f.delay}}">
+<div class="bob">
+<sc-if value="{{f.isFish}}" hint-placeholder-val="{{true}}">
+<svg role="img" aria-label="{{f.name}}" width="{{f.w}}" height="{{f.h}}" viewBox="0 0 60 36"><path d="M14 18 L 2 6 L 4 18 L 2 30 Z" fill="{{f.color}}"></path><ellipse cx="34" cy="18" rx="22" ry="14" fill="{{f.color}}"></ellipse><path d="M30 5 C 33 11, 33 25, 30 31" stroke="{{f.stripe}}" stroke-width="4" fill="none"></path><path d="M34 6 C 40 2, 46 3, 48 6" fill="{{f.color}}"></path><circle cx="46" cy="15" r="3" fill="#2B2F55"></circle><circle cx="47" cy="14" r="1" fill="#FFFFFF"></circle></svg>
+</sc-if>
+<sc-if value="{{f.isJelly}}" hint-placeholder-val="{{false}}">
+<svg role="img" aria-label="{{f.name}}" width="44" height="58" viewBox="0 0 44 58"><path d="M4 22 C 4 4, 40 4, 40 22 Z" fill="{{f.color}}" opacity="0.92"></path><path d="M10 24 C 8 34, 14 40, 10 52 M18 24 C 17 36, 22 42, 19 56 M26 24 C 27 36, 22 42, 25 56 M34 24 C 36 34, 30 40, 34 52" stroke="{{f.color}}" stroke-width="2.5" fill="none" stroke-linecap="round"></path><circle cx="16" cy="15" r="2" fill="#FFFFFF"></circle></svg>
+</sc-if>
+</div>
+</div>
+</sc-for>
+
+<sc-if value="{{feeding}}" hint-placeholder-val="{{false}}">
+<div aria-hidden="true" class="fall" style="position: absolute; top: 90px; left: 130px; width: 7px; height: 7px; border-radius: 50%; background: #E9A15F"></div>
+<div aria-hidden="true" class="fall" style="position: absolute; top: 96px; left: 170px; width: 6px; height: 6px; border-radius: 50%; background: #E9A15F; animation-delay: .2s"></div>
+<div aria-hidden="true" class="fall" style="position: absolute; top: 86px; left: 205px; width: 7px; height: 7px; border-radius: 50%; background: #E9A15F; animation-delay: .4s"></div>
+<div aria-hidden="true" class="fall" style="position: absolute; top: 100px; left: 240px; width: 6px; height: 6px; border-radius: 50%; background: #E9A15F; animation-delay: .1s"></div>
+</sc-if>
+
+<svg aria-hidden="true" width="100%" height="120" viewBox="0 0 390 120" preserveAspectRatio="none" style="position: absolute; bottom: 0; left: 0"><path d="M0 60 C 80 30, 160 70, 230 50 C 300 30, 350 50, 390 40 L 390 120 L 0 120 Z" fill="{{sandColor}}"></path><path d="M150 70 C 150 30, 230 20, 240 62 Z" fill="{{rockColor}}"></path><circle cx="60" cy="72" r="6" fill="#FFB3D6"></circle><circle cx="74" cy="78" r="4" fill="#FFD66B"></circle><path d="M300 68 C 296 50, 306 40, 300 30 M300 52 C 312 46, 316 40, 314 34 M300 58 C 290 52, 286 46, 288 40" stroke="#FF9CC8" stroke-width="5" fill="none" stroke-linecap="round"></path></svg>
+
+<sc-if value="{{hasTable}}" hint-placeholder-val="{{false}}">
+<svg role="img" aria-label="Shell picnic table" width="74" height="46" viewBox="0 0 74 46" style="position: absolute; bottom: 44px; left: 52px"><path d="M4 18 C 4 4, 70 4, 70 18 Z" fill="#FFE1EE"></path><path d="M14 9 L 37 18 M37 6 L 37 18 M60 9 L 37 18" stroke="#FF9CC8" stroke-width="2"></path><rect x="12" y="18" width="6" height="26" rx="3" fill="#F2C9DA"></rect><rect x="56" y="18" width="6" height="26" rx="3" fill="#F2C9DA"></rect></svg>
+</sc-if>
+<sc-if value="{{hasLantern}}" hint-placeholder-val="{{false}}">
+<svg role="img" aria-label="Lantern coral" width="44" height="80" viewBox="0 0 44 80" style="position: absolute; bottom: 46px; right: 52px"><path d="M22 80 L 22 30 M22 50 L 8 34 M22 44 L 36 28" stroke="#C9A6F5" stroke-width="4" stroke-linecap="round"></path><circle cx="22" cy="24" r="9" fill="#FFF3B0"></circle><circle cx="8" cy="30" r="7" fill="#FFF3B0"></circle><circle cx="36" cy="24" r="7" fill="#FFF3B0"></circle><circle cx="22" cy="24" r="16" fill="#FFF3B0" opacity="0.25"></circle></svg>
+</sc-if>
+<sc-if value="{{hasArch}}" hint-placeholder-val="{{false}}">
+<svg role="img" aria-label="Friendship arch" width="110" height="80" viewBox="0 0 110 80" style="position: absolute; bottom: 52px; left: 140px"><path d="M8 80 L 8 46 C 8 4, 102 4, 102 46 L 102 80 L 86 80 L 86 48 C 86 22, 24 22, 24 48 L 24 80 Z" fill="#B9E7F0"></path><circle cx="20" cy="30" r="4" fill="#FFB3D6"></circle><circle cx="55" cy="14" r="4" fill="#FFD66B"></circle><circle cx="90" cy="30" r="4" fill="#FFB3D6"></circle></svg>
+</sc-if>
+
+<div style="position: absolute; top: 0; left: 0; right: 0; padding: 22px 20px 0; display: flex; justify-content: space-between; align-items: flex-start">
+<div><div style="font-size: 14px; font-weight: 700; color: #FFFFFF">Hi Mei, it's good to see you</div><div style="font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 28px; color: #FFFFFF">Your tide pool</div></div>
+<button onClick="{{goHelp}}" aria-label="Get support now" style="min-height: 44px; padding: 0 14px; border: 0; border-radius: 999px; background: #FFFFFF; color: #A13A72; font-weight: 800; font-size: 14px; display: flex; align-items: center; gap: 6px"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="4"></circle><path d="M5.6 5.6l3.6 3.6M14.8 14.8l3.6 3.6M18.4 5.6l-3.6 3.6M9.2 14.8l-3.6 3.6"></path></svg>Support</button>
+</div>
+
+<div style="position: absolute; left: 16px; right: 16px; bottom: 14px; display: flex; justify-content: space-between; align-items: center; gap: 8px">
+<button onClick="{{feed}}" style="min-height: 44px; padding: 0 16px; border: 0; border-radius: 999px; background: rgba(255,255,255,0.92); color: #2F3A66; font-weight: 800; font-size: 14px; display: flex; align-items: center; gap: 8px"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24"><circle cx="8" cy="9" r="3" fill="#E9A15F"></circle><circle cx="15" cy="8" r="2.5" fill="#E9A15F"></circle><circle cx="12" cy="15" r="3" fill="#E9A15F"></circle></svg>{{feedLabel}}</button>
+<sc-if value="{{calmUnlocked}}" hint-placeholder-val="{{false}}">
+<button onClick="{{toggleCalm}}" aria-pressed="{{calm}}" style="min-height: 44px; padding: 0 16px; border: 0; border-radius: 999px; background: rgba(255,255,255,0.92); color: #2F3A66; font-weight: 800; font-size: 14px">{{calmLabel}}</button>
+</sc-if>
+</div>
+</div>
+
+<div style="padding: 20px 18px 24px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; align-items: baseline">
+<h2 style="margin: 0; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 21px">Small things that help</h2>
+<span style="font-size: 13px; font-weight: 700; color: #6A5A2A">{{poolCount}}</span>
+</div>
+
+<button onClick="{{goCheckin}}" style="text-align: left; border: 0; background: #FFFFFF; border-radius: 20px; padding: 14px 16px; display: flex; align-items: center; gap: 14px; color: #2F3A66">
+<div style="width: 48px; height: 48px; flex: none; border-radius: 16px; background: #FFE9C7; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8A5A12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="7"></circle><path d="M9 13.5c.8 1.2 1.8 1.8 3 1.8s2.2-.6 3-1.8"></path><path d="M12 3v3"></path></svg></div>
+<div style="flex: 1"><div style="font-weight: 800; font-size: 16px">Meal-support check-in</div><div style="font-size: 14px; color: #4A5578">How did today's meal feel?</div></div>
+<span style="font-size: 12px; font-weight: 800; color: #8A5A12; background: #FFF1D6; padding: 5px 9px; border-radius: 999px">+ fish food</span>
+</button>
+
+<button onClick="{{goCoping}}" style="text-align: left; border: 0; background: #FFFFFF; border-radius: 20px; padding: 14px 16px; display: flex; align-items: center; gap: 14px; color: #2F3A66">
+<div style="width: 48px; height: 48px; flex: none; border-radius: 16px; background: #DCE6FB; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3B55A6" stroke-width="2" stroke-linecap="round"><path d="M4 10c2-5 14-5 16 0z"></path><path d="M8 12c-1 3 1 5 0 8M12 12c0 3 1 5 0 8M16 12c1 3-1 5 0 8"></path></svg></div>
+<div style="flex: 1"><div style="font-weight: 800; font-size: 16px">Practise a coping technique</div><div style="font-size: 14px; color: #4A5578">Breathing, grounding, kind words</div></div>
+<span style="font-size: 12px; font-weight: 800; color: #3B55A6; background: #EAF0FD; padding: 5px 9px; border-radius: 999px">New fish</span>
+</button>
+
+<button onClick="{{logShared}}" style="text-align: left; border: 0; background: #FFFFFF; border-radius: 20px; padding: 14px 16px; display: flex; align-items: center; gap: 14px; color: #2F3A66">
+<div style="width: 48px; height: 48px; flex: none; border-radius: 16px; background: #FFE1EE; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#A13A72" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="3"></circle><circle cx="16" cy="8" r="3"></circle><path d="M3 20c0-3 2.5-5 5-5s5 2 5 5M11 20c0-3 2.5-5 5-5s5 2 5 5"></path></svg></div>
+<div style="flex: 1"><div style="font-weight: 800; font-size: 16px">I shared a meal with someone</div><div style="font-size: 14px; color: #4A5578">A friend, family, a support group</div></div>
+<span style="font-size: 12px; font-weight: 800; color: #A13A72; background: #FFEFF6; padding: 5px 9px; border-radius: 999px">Decoration</span>
+</button>
+
+<button onClick="{{goBreak}}" style="text-align: left; border: 0; background: #FFFFFF; border-radius: 20px; padding: 14px 16px; display: flex; align-items: center; gap: 14px; color: #2F3A66">
+<div style="width: 48px; height: 48px; flex: none; border-radius: 16px; background: #E8E1FB; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5B3FA6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg></div>
+<div style="flex: 1"><div style="font-weight: 800; font-size: 16px">I need a break</div><div style="font-size: 14px; color: #4A5578">Feeling overwhelmed? Step away here.</div></div>
+<span style="font-size: 12px; font-weight: 800; color: #5B3FA6; background: #F1ECFD; padding: 5px 9px; border-radius: 999px">Calm scene</span>
+</button>
+
+<p style="margin: 6px 4px 0; font-size: 14px; line-height: 1.5; color: #4A5578; text-align: center">No streaks, no scores, no penalties. Hard days are part of it — your pool is always here.</p>
+</div>
+</div>
+</sc-if>
+
+
+<sc-if value="{{isCheckin}}" hint-placeholder-val="{{false}}">
+<div style="flex: 1; overflow-y: auto; padding: 18px 20px 28px; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px">
+<button onClick="{{goHome}}" style="align-self: flex-start; min-height: 44px; border: 0; background: transparent; padding: 0; color: #3B55A6; font-weight: 800; font-size: 15px; display: flex; align-items: center; gap: 4px"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 6l-6 6 6 6"></path></svg>Tide pool</button>
+<div>
+<h1 style="margin: 0; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 30px">Meal check-in</h1>
+<p style="margin: 6px 0 0; font-size: 15px; line-height: 1.5; color: #4A5578">Just how it felt. No amounts, no numbers, nothing to get right.</p>
+</div>
+
+<div>
+<div style="font-weight: 800; font-size: 16px; margin-bottom: 10px">Which meal?</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{mealChips}}" as="c" hint-placeholder-count="5">
+<button onClick="{{c.pick}}" aria-pressed="{{c.sel}}" style="{{c.style}}">{{c.label}}</button>
+</sc-for>
+</div>
+</div>
+
+<div>
+<div style="font-weight: 800; font-size: 16px; margin-bottom: 10px">How did it feel?</div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{moods}}" as="m" hint-placeholder-count="4">
+<button onClick="{{m.pick}}" aria-pressed="{{m.sel}}" style="{{m.style}}">
+<svg aria-hidden="true" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="17" fill="{{m.face}}"></circle><circle cx="14" cy="17" r="2" fill="#2F3A66"></circle><circle cx="26" cy="17" r="2" fill="#2F3A66"></circle><path d="{{m.mouth}}" stroke="#2F3A66" stroke-width="2.2" fill="none" stroke-linecap="round"></path></svg>
+<span style="font-size: 13px; font-weight: 800">{{m.label}}</span>
+</button>
+</sc-for>
+</div>
+</div>
+
+<sc-if value="{{overwhelmed}}" hint-placeholder-val="{{false}}">
+<div class="pop" style="background: #FFE1EE; border-radius: 20px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px">
+<div style="font-weight: 800; font-size: 16px; color: #6B2350">That sounds like a lot right now.</div>
+<div style="font-size: 15px; line-height: 1.5; color: #5A2A45">Thank you for telling us. You don't have to handle it alone — would one of these help?</div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<button onClick="{{goHelp}}" style="min-height: 44px; padding: 0 14px; border: 0; border-radius: 12px; background: #A13A72; color: #FFFFFF; font-weight: 800; font-size: 14px">Talk to someone now</button>
+<button onClick="{{goCoping}}" style="min-height: 44px; padding: 0 14px; border: 0; border-radius: 12px; background: #FFFFFF; color: #6B2350; font-weight: 800; font-size: 14px">Try a calming exercise</button>
+</div>
+</div>
+</sc-if>
+
+<div>
+<div style="font-weight: 800; font-size: 16px; margin-bottom: 10px">What helped? <span style="font-weight: 600; color: #4A5578">(optional)</span></div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{helpChips}}" as="c" hint-placeholder-count="6">
+<button onClick="{{c.pick}}" aria-pressed="{{c.sel}}" style="{{c.style}}">{{c.label}}</button>
+</sc-for>
+</div>
+</div>
+
+<div>
+<label for="journal" style="display: block; font-weight: 800; font-size: 16px; margin-bottom: 8px">Anything else on your mind?</label>
+<textarea id="journal" rows="3" placeholder="Write as much or as little as you like…" style="width: 100%; box-sizing: border-box; border: 1.5px solid #E6DAB4; border-radius: 16px; padding: 12px 14px; font-family: inherit; font-size: 15px; background: #FFFFFF; color: #2F3A66; resize: none"></textarea>
+<div style="font-size: 13px; color: #4A5578; margin-top: 6px; display: flex; gap: 6px; align-items: center"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="10" width="14" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>Private journal — only shared if you choose.</div>
+</div>
+
+<button onClick="{{saveCheckin}}" disabled="{{saveDisabled}}" style="{{saveStyle}}">Save check-in</button>
+</div>
+</sc-if>
+
+
+<sc-if value="{{isCoping}}" hint-placeholder-val="{{false}}">
+<div style="flex: 1; overflow-y: auto; padding: 18px 20px 28px; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px; background: #EEF2FD">
+<button onClick="{{goHome}}" style="align-self: flex-start; min-height: 44px; border: 0; background: transparent; padding: 0; color: #3B55A6; font-weight: 800; font-size: 15px; display: flex; align-items: center; gap: 4px"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 6l-6 6 6 6"></path></svg>Tide pool</button>
+<h1 style="margin: 0; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 30px">Coping corner</h1>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<sc-for list="{{techs}}" as="t" hint-placeholder-count="3">
+<button onClick="{{t.pick}}" aria-pressed="{{t.sel}}" style="{{t.style}}">{{t.label}}</button>
+</sc-for>
+</div>
+
+<sc-if value="{{techBreathe}}" hint-placeholder-val="{{true}}">
+<div style="background: #FFFFFF; border-radius: 28px; padding: 28px 20px; display: flex; flex-direction: column; align-items: center; gap: 14px">
+<div style="width: 220px; height: 220px; border-radius: 50%; background: #DCE6FB; display: flex; align-items: center; justify-content: center">
+<svg class="breathe" role="img" aria-label="A jellyfish gently growing and shrinking" width="150" height="180" viewBox="0 0 44 58"><path d="M4 22 C 4 4, 40 4, 40 22 Z" fill="#9DB4F0"></path><path d="M10 24 C 8 34, 14 40, 10 52 M18 24 C 17 36, 22 42, 19 56 M26 24 C 27 36, 22 42, 25 56 M34 24 C 36 34, 30 40, 34 52" stroke="#9DB4F0" stroke-width="2.5" fill="none" stroke-linecap="round"></path><circle cx="16" cy="15" r="2" fill="#FFFFFF"></circle></svg>
+</div>
+<div style="position: relative; height: 34px; width: 100%; text-align: center; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 24px; color: #3B55A6">
+<span class="in-txt" style="position: absolute; left: 0; right: 0">Breathe in…</span>
+<span class="out-txt" style="position: absolute; left: 0; right: 0">…and out</span>
+</div>
+<p style="margin: 0; font-size: 15px; line-height: 1.5; color: #4A5578; text-align: center">Follow the jelly. In as it grows, out as it settles. Try five slow rounds.</p>
+</div>
+</sc-if>
+<sc-if value="{{techGround}}" hint-placeholder-val="{{false}}">
+<div style="background: #FFFFFF; border-radius: 28px; padding: 22px 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="font-weight: 800; font-size: 17px">5-4-3-2-1 grounding</div>
+<div style="font-size: 15px; line-height: 1.5; color: #4A5578">Look around and gently notice:</div>
+<div style="display: flex; flex-direction: column; gap: 8px; font-size: 15px">
+<div style="display: flex; gap: 12px; align-items: center"><span style="width: 32px; height: 32px; border-radius: 50%; background: #DCE6FB; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #3B55A6">5</span>things you can see</div>
+<div style="display: flex; gap: 12px; align-items: center"><span style="width: 32px; height: 32px; border-radius: 50%; background: #DCE6FB; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #3B55A6">4</span>things you can touch</div>
+<div style="display: flex; gap: 12px; align-items: center"><span style="width: 32px; height: 32px; border-radius: 50%; background: #DCE6FB; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #3B55A6">3</span>things you can hear</div>
+<div style="display: flex; gap: 12px; align-items: center"><span style="width: 32px; height: 32px; border-radius: 50%; background: #DCE6FB; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #3B55A6">2</span>things you can smell</div>
+<div style="display: flex; gap: 12px; align-items: center"><span style="width: 32px; height: 32px; border-radius: 50%; background: #DCE6FB; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #3B55A6">1</span>slow, kind breath</div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{techKind}}" hint-placeholder-val="{{false}}">
+<div style="background: #FFFFFF; border-radius: 28px; padding: 26px 22px; display: flex; flex-direction: column; gap: 14px">
+<div style="font-weight: 800; font-size: 17px">Kind words to yourself</div>
+<div style="font-size: 15px; color: #4A5578">Read each one slowly. Stay with whichever feels truest.</div>
+<div style="font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 21px; line-height: 1.4; color: #3B55A6">I'm allowed to go at my own pace.</div>
+<div style="font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 21px; line-height: 1.4; color: #A13A72">A hard moment isn't a step backwards.</div>
+<div style="font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 21px; line-height: 1.4; color: #1F6E55">I deserve care, today and every day.</div>
+</div>
+</sc-if>
+
+<div style="flex: 1"></div>
+<button onClick="{{finishCoping}}" style="min-height: 56px; border: 0; border-radius: 18px; background: #5068B5; color: #FFFFFF; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 19px">I tried it</button>
+</div>
+</sc-if>
+
+
+<sc-if value="{{isBreak}}" hint-placeholder-val="{{false}}">
+<div style="flex: 1; min-height: 0; position: relative; overflow-x: hidden; overflow-y: auto; background: #3E3D7C; display: flex; flex-direction: column; align-items: center; padding: 32px 28px 28px; box-sizing: border-box; gap: 16px; color: #FFFFFF">
+<div style="flex: 1 0 40px"></div>
+<div aria-hidden="true" style="position: absolute; top: 90px; right: 50px; width: 64px; height: 64px; border-radius: 50%; background: #FFF6D8; box-shadow: 0 0 60px 24px rgba(255,246,216,0.3)"></div>
+<div aria-hidden="true" class="drift" style="position: absolute; top: 56px; left: 32px; animation-duration: 18s"><svg width="44" height="58" viewBox="0 0 44 58"><path d="M4 22 C 4 4, 40 4, 40 22 Z" fill="#C9D8FF" opacity="0.85"></path><path d="M10 24 C 8 34, 14 40, 10 52 M18 24 C 17 36, 22 42, 19 56 M26 24 C 27 36, 22 42, 25 56 M34 24 C 36 34, 30 40, 34 52" stroke="#C9D8FF" stroke-width="2.5" fill="none" stroke-linecap="round"></path></svg></div>
+<div aria-hidden="true" class="drift" style="position: absolute; bottom: 210px; right: 70px; animation-duration: 22s; animation-delay: -6s"><svg width="34" height="46" viewBox="0 0 44 58"><path d="M4 22 C 4 4, 40 4, 40 22 Z" fill="#E2C9FF" opacity="0.85"></path><path d="M10 24 C 8 34, 14 40, 10 52 M18 24 C 17 36, 22 42, 19 56 M26 24 C 27 36, 22 42, 25 56 M34 24 C 36 34, 30 40, 34 52" stroke="#E2C9FF" stroke-width="2.5" fill="none" stroke-linecap="round"></path></svg></div>
+<h1 style="margin: 0; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 34px; text-align: center; position: relative">It's okay to pause.</h1>
+<p style="margin: 0; font-size: 17px; line-height: 1.55; text-align: center; color: #E4E6FF; max-width: 290px; position: relative">Nothing needs doing right now. Stay as long as you like — the tide pool will be right here.</p>
+<div style="flex: 1 0 32px"></div>
+<div style="align-self: stretch; position: relative; display: flex; flex-direction: column; gap: 10px">
+<button onClick="{{finishBreak}}" style="min-height: 56px; border: 0; border-radius: 18px; background: #FFFFFF; color: #3E3D7C; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 18px">Back to my tide pool</button>
+<button onClick="{{goHelp}}" style="min-height: 48px; border: 1.5px solid rgba(255,255,255,0.6); border-radius: 18px; background: transparent; color: #FFFFFF; font-weight: 800; font-size: 15px">I'd like to talk to someone</button>
+</div>
+</div>
+</sc-if>
+
+
+<sc-if value="{{isEat}}" hint-placeholder-val="{{false}}">
+<div style="flex: 1; overflow-y: auto; padding: 26px 18px 28px; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px">
+<div>
+<h1 style="margin: 0; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 30px">Eat Together</h1>
+<p style="margin: 4px 0 0; font-size: 15px; line-height: 1.5; color: #4A5578">Meals feel lighter with good company.</p>
+</div>
+
+<div style="background: #FFFFFF; border-radius: 22px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+<div style="font-weight: 800; font-size: 17px">Invite someone you trust</div>
+<div style="display: flex; gap: 10px">
+<sc-for list="{{friends}}" as="p" hint-placeholder-count="3">
+<button onClick="{{p.pick}}" aria-pressed="{{p.sel}}" style="{{p.style}}">
+<span style="width: 44px; height: 44px; border-radius: 50%; background: {{p.bg}}; display: flex; align-items: center; justify-content: center; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 18px; color: #2F3A66">{{p.initial}}</span>
+<span style="font-size: 13px; font-weight: 800">{{p.name}}</span>
+</button>
+</sc-for>
+</div>
+<sc-if value="{{hasInvitee}}" hint-placeholder-val="{{false}}">
+<div class="pop" style="background: #FFF7DC; border-radius: 16px; padding: 14px; font-size: 15px; line-height: 1.5">"Hey {{invitee}}! Want to grab lunch together on Saturday? Somewhere chill — no pressure at all."</div>
+<button onClick="{{sendInvite}}" style="min-height: 48px; border: 0; border-radius: 14px; background: #5068B5; color: #FFFFFF; font-weight: 800; font-size: 15px">Send invite to {{invitee}}</button>
+</sc-if>
+</div>
+
+<div style="background: #DCE6FB; border-radius: 22px; padding: 18px; display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 12px; font-weight: 800; letter-spacing: 1px; color: #3B55A6">PROFESSIONALLY FACILITATED</div>
+<div style="font-weight: 800; font-size: 17px">Supported meal sessions</div>
+<div style="font-size: 15px; line-height: 1.5; color: #3E4C7A">Optional group meals with trained staff. In this concept, we would link to existing SGH support activities rather than replace them.</div>
+<button onClick="{{findSession}}" style="align-self: flex-start; min-height: 44px; padding: 0 16px; border: 0; border-radius: 12px; background: #FFFFFF; color: #3B55A6; font-weight: 800; font-size: 14px; margin-top: 4px">Find a session</button>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 10px">
+<div style="font-weight: 800; font-size: 17px">Low-pressure plans</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<div style="background: #FFE1EE; border-radius: 18px; padding: 14px; font-weight: 800; font-size: 15px; color: #6B2350">Board game café</div>
+<div style="background: #E3F6EE; border-radius: 18px; padding: 14px; font-weight: 800; font-size: 15px; color: #1F5A47">Pottery class</div>
+<div style="background: #FFF1C9; border-radius: 18px; padding: 14px; font-weight: 800; font-size: 15px; color: #6A4A10">Gardens walk</div>
+<div style="background: #E8E1FB; border-radius: 18px; padding: 14px; font-weight: 800; font-size: 15px; color: #45318A">Movie night in</div>
+</div>
+</div>
+
+<button onClick="{{logShared}}" style="min-height: 52px; border: 2px dashed #FF9CC8; border-radius: 18px; background: #FFFFFF; color: #A13A72; font-weight: 800; font-size: 15px">I shared a meal today — add to my pool</button>
+
+<div style="display: flex; flex-direction: column; gap: 10px">
+<div style="font-weight: 800; font-size: 17px">Saved kind words</div>
+<div style="background: #FFFFFF; border-radius: 18px; padding: 14px 16px"><div style="font-size: 15px; line-height: 1.5">"Proud of you for coming out tonight. That dessert was the best part!"</div><div style="font-size: 13px; font-weight: 800; color: #A13A72; margin-top: 6px">— Aisha</div></div>
+<div style="background: #FFFFFF; border-radius: 18px; padding: 14px 16px"><div style="font-size: 15px; line-height: 1.5">"Same time next week? I'll save you a seat."</div><div style="font-size: 13px; font-weight: 800; color: #3B55A6; margin-top: 6px">— Jun</div></div>
+</div>
+</div>
+</sc-if>
+
+
+<sc-if value="{{isCare}}" hint-placeholder-val="{{false}}">
+<div style="flex: 1; overflow-y: auto; padding: 26px 18px 28px; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px">
+<div>
+<h1 style="margin: 0; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 30px">My Care Team</h1>
+<p style="margin: 4px 0 0; font-size: 15px; line-height: 1.5; color: #4A5578; display: flex; align-items: center; gap: 6px"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="10" width="14" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>Secure space, linked to your clinic</p>
+</div>
+
+<div style="background: #FFFFFF; border-radius: 22px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+<div style="font-weight: 800; font-size: 17px">Upcoming</div>
+<div style="display: flex; gap: 14px; align-items: center">
+<div style="width: 54px; flex: none; border-radius: 14px; background: #DCE6FB; padding: 6px 0; text-align: center"><div style="font-size: 12px; font-weight: 800; color: #3B55A6">OCT</div><div style="font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 22px">29</div></div>
+<div><div style="font-weight: 800; font-size: 15px">Dietitian session</div><div style="font-size: 14px; color: #4A5578">Thu · 10:00 AM · [Clinic name]</div></div>
+</div>
+<div style="display: flex; gap: 14px; align-items: center">
+<div style="width: 54px; flex: none; border-radius: 14px; background: #FFE1EE; padding: 6px 0; text-align: center"><div style="font-size: 12px; font-weight: 800; color: #A13A72">NOV</div><div style="font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 22px">03</div></div>
+<div><div style="font-weight: 800; font-size: 15px">Therapy session</div><div style="font-size: 14px; color: #4A5578">Tue · 2:30 PM · [Clinic name]</div></div>
+</div>
+</div>
+
+<div style="background: #E3F6EE; border-radius: 22px; padding: 18px; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; align-items: center; gap: 8px"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1F6E55" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"></path><path d="M9 12l2 2 4-4"></path></svg><span style="font-size: 12px; font-weight: 800; letter-spacing: 1px; color: #1F5A47">CLINICIAN-APPROVED</span></div>
+<div style="font-weight: 800; font-size: 17px">Your meal guidance</div>
+<div style="font-size: 15px; line-height: 1.5; color: #24483C">Regular meals and snacks through the day, as planned with your dietitian. Your full plan appears here once your care team has approved it.</div>
+</div>
+
+<div style="background: #FFFFFF; border-radius: 22px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+<div style="font-weight: 800; font-size: 17px">Questions for my next session</div>
+<sc-for list="{{questions}}" as="q" hint-placeholder-count="2">
+<div style="display: flex; gap: 10px; align-items: flex-start; font-size: 15px; line-height: 1.45"><span style="width: 8px; height: 8px; flex: none; border-radius: 50%; background: #FF9CC8; margin-top: 7px"></span>{{q.text}}</div>
+</sc-for>
+<div style="display: flex; gap: 8px">
+<label for="qinput" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">New question</label>
+<input id="qinput" value="{{draft}}" onChange="{{onDraft}}" placeholder="Add a question…" style="flex: 1; min-width: 0; min-height: 44px; border: 1.5px solid #E6DAB4; border-radius: 12px; padding: 0 12px; font-family: inherit; font-size: 15px; color: #2F3A66; background: #FFFDF5">
+<button onClick="{{addQuestion}}" style="min-height: 44px; padding: 0 16px; border: 0; border-radius: 12px; background: #5068B5; color: #FFFFFF; font-weight: 800; font-size: 14px">Add</button>
+</div>
+</div>
+
+<div style="background: #FFFFFF; border-radius: 22px; padding: 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="font-weight: 800; font-size: 17px">What I share</div>
+<div style="font-size: 14px; color: #4A5578; margin-bottom: 6px">Nothing leaves your phone without your OK.</div>
+<sc-for list="{{shares}}" as="s" hint-placeholder-count="3">
+<button onClick="{{s.toggle}}" aria-pressed="{{s.on}}" style="display: flex; justify-content: space-between; align-items: center; min-height: 52px; border: 0; background: transparent; padding: 0; color: #2F3A66; font-size: 15px; font-weight: 700; text-align: left">
+<span>{{s.label}}</span>
+<span style="{{s.track}}"><span style="{{s.knob}}"></span></span>
+</button>
+</sc-for>
+</div>
+
+<div style="border: 1.5px dashed #C9B98A; border-radius: 22px; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 12px; font-weight: 800; letter-spacing: 1px; color: #6A5A2A">PROPOSED PARTNERS · CONCEPT ONLY</div>
+<div style="font-size: 15px; line-height: 1.5"><b>Singapore General Hospital</b> — clinical &amp; nutrition partner: reviews journal and nutrition content, safe meal-support features, referrals to its Eating Disorders Programme.</div>
+<div style="font-size: 15px; line-height: 1.5"><b>Institute of Mental Health</b> — mental health partner: reviews check-ins and coping exercises, escalation pathways and safeguards.</div>
+<div style="font-size: 13px; color: #6A5A2A">A proposed collaboration, not an existing arrangement.</div>
+</div>
+</div>
+</sc-if>
+
+
+<sc-if value="{{isHelp}}" hint-placeholder-val="{{false}}">
+<div style="flex: 1; overflow-y: auto; padding: 18px 20px 28px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px; background: #FFF0F6">
+<button onClick="{{goBack}}" style="align-self: flex-start; min-height: 44px; border: 0; background: transparent; padding: 0; color: #A13A72; font-weight: 800; font-size: 15px; display: flex; align-items: center; gap: 4px"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 6l-6 6 6 6"></path></svg>Back</button>
+<h1 style="margin: 0; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 32px; color: #6B2350">You're not alone.</h1>
+<p style="margin: 0; font-size: 15px; line-height: 1.5; color: #5A2A45">Reaching out is a strong thing to do. Here's who you can talk to right now.</p>
+
+<a href="tel:1771" style="text-decoration: none; background: #FFFFFF; border-radius: 20px; padding: 16px 18px; display: flex; gap: 14px; align-items: center; color: #2F3A66">
+<div style="width: 48px; height: 48px; flex: none; border-radius: 50%; background: #FFB3D6; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6B2350" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"></path></svg></div>
+<div><div style="font-weight: 800; font-size: 16px">national mindline 1771</div><div style="font-size: 14px; color: #4A5578">Call 1771 or WhatsApp 6669 1771 · 24/7</div></div>
+</a>
+<a href="tel:1767" style="text-decoration: none; background: #FFFFFF; border-radius: 20px; padding: 16px 18px; display: flex; gap: 14px; align-items: center; color: #2F3A66">
+<div style="width: 48px; height: 48px; flex: none; border-radius: 50%; background: #DCE6FB; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3B55A6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"></path></svg></div>
+<div><div style="font-weight: 800; font-size: 16px">Samaritans of Singapore</div><div style="font-size: 14px; color: #4A5578">Call 1767 · 24 hours</div></div>
+</a>
+<button onClick="{{goCare}}" style="text-align: left; border: 0; background: #FFFFFF; border-radius: 20px; padding: 16px 18px; display: flex; gap: 14px; align-items: center; color: #2F3A66">
+<div style="width: 48px; height: 48px; flex: none; border-radius: 50%; background: #E3F6EE; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F6E55" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H8l-4 4z"></path></svg></div>
+<div><div style="font-weight: 800; font-size: 16px">Message my care team</div><div style="font-size: 14px; color: #4A5578">Replies during clinic hours</div></div>
+</button>
+<button onClick="{{goCoping}}" style="text-align: left; border: 0; background: #FFFFFF; border-radius: 20px; padding: 16px 18px; display: flex; gap: 14px; align-items: center; color: #2F3A66">
+<div style="width: 48px; height: 48px; flex: none; border-radius: 50%; background: #E8E1FB; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5B3FA6" stroke-width="2" stroke-linecap="round"><path d="M4 10c2-5 14-5 16 0z"></path><path d="M8 12c-1 3 1 5 0 8M12 12c0 3 1 5 0 8M16 12c1 3-1 5 0 8"></path></svg></div>
+<div><div style="font-weight: 800; font-size: 16px">Breathe with the jelly</div><div style="font-size: 14px; color: #4A5578">A one-minute calming exercise</div></div>
+</button>
+<div style="background: #6B2350; color: #FFFFFF; border-radius: 20px; padding: 16px 18px; font-size: 15px; line-height: 1.5"><b>In immediate danger?</b> Call <a href="tel:995" style="color: #FFFFFF; font-weight: 800">995</a> for an ambulance, or go to the nearest A&amp;E.</div>
+</div>
+</sc-if>
+
+
+<sc-if value="{{showNav}}" hint-placeholder-val="{{false}}">
+<nav aria-label="Main" style="height: 76px; flex: none; background: #FFFFFF; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid #F0E6C8">
+<button onClick="{{goHome}}" aria-current="{{navHomeCur}}" style="{{navHome}}"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12c3-5 9-6 13-2l5-3v10l-5-3c-4 4-10 3-13-2z"></path></svg>Tide pool</button>
+<button onClick="{{goEat}}" aria-current="{{navEatCur}}" style="{{navEat}}"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="3"></circle><circle cx="16" cy="8" r="3"></circle><path d="M3 20c0-3 2.5-5 5-5s5 2 5 5M11 20c0-3 2.5-5 5-5s5 2 5 5"></path></svg>Eat Together</button>
+<button onClick="{{goCare}}" aria-current="{{navCareCur}}" style="{{navCare}}"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10z"></path><path d="M9.5 12h5M12 9.5v5"></path></svg>Care Team</button>
+</nav>
+</sc-if>
+
+
+<sc-if value="{{hasToast}}" hint-placeholder-val="{{false}}">
+<div role="status" class="pop" style="position: absolute; left: 20px; right: 20px; bottom: 94px; background: #2F3A66; color: #FFFFFF; border-radius: 16px; padding: 14px 16px; font-size: 15px; font-weight: 700; text-align: center">{{toast}}</div>
+</sc-if>
+
+
+<sc-if value="{{hasUnlock}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; inset: 0; background: rgba(47,58,102,0.45); display: flex; align-items: center; justify-content: center; padding: 28px">
+<div role="dialog" aria-modal="true" aria-label="Something new for your tide pool" class="pop" style="width: 100%; background: #FFF7DC; border-radius: 28px; padding: 28px 22px 22px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center">
+<div style="width: 120px; height: 120px; border-radius: 50%; background: #DCE6FB; display: flex; align-items: center; justify-content: center">
+<sc-if value="{{unlockFish}}" hint-placeholder-val="{{true}}">
+<svg aria-hidden="true" width="84" height="50" viewBox="0 0 60 36"><path d="M14 18 L 2 6 L 4 18 L 2 30 Z" fill="{{unlockColor}}"></path><ellipse cx="34" cy="18" rx="22" ry="14" fill="{{unlockColor}}"></ellipse><path d="M30 5 C 33 11, 33 25, 30 31" stroke="{{unlockStripe}}" stroke-width="4" fill="none"></path><circle cx="46" cy="15" r="3" fill="#2B2F55"></circle><circle cx="47" cy="14" r="1" fill="#FFFFFF"></circle></svg>
+</sc-if>
+<sc-if value="{{unlockJelly}}" hint-placeholder-val="{{false}}">
+<svg aria-hidden="true" width="56" height="74" viewBox="0 0 44 58"><path d="M4 22 C 4 4, 40 4, 40 22 Z" fill="{{unlockColor}}"></path><path d="M10 24 C 8 34, 14 40, 10 52 M18 24 C 17 36, 22 42, 19 56 M26 24 C 27 36, 22 42, 25 56 M34 24 C 36 34, 30 40, 34 52" stroke="{{unlockColor}}" stroke-width="2.5" fill="none" stroke-linecap="round"></path><circle cx="16" cy="15" r="2" fill="#FFFFFF"></circle></svg>
+</sc-if>
+<sc-if value="{{unlockOther}}" hint-placeholder-val="{{false}}">
+<svg aria-hidden="true" width="60" height="66" viewBox="0 0 40 44"><path d="M20 0 C 22 16, 26 20, 40 22 C 26 24, 22 28, 20 44 C 18 28, 14 24, 0 22 C 14 20, 18 16, 20 0 Z" fill="#FF9CC8"></path></svg>
+</sc-if>
+</div>
+<div style="font-size: 13px; font-weight: 800; letter-spacing: 1.5px; color: #A13A72">{{unlockKicker}}</div>
+<div style="font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 26px">{{unlockTitle}}</div>
+<div style="font-size: 15px; line-height: 1.5; color: #4A5578">{{unlockBody}}</div>
+<button onClick="{{closeUnlock}}" style="width: 100%; min-height: 52px; margin-top: 6px; border: 0; border-radius: 16px; background: #5068B5; color: #FFFFFF; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 18px">Lovely</button>
+</div>
+</div>
+</sc-if>
+
+</div>
+</template>
+<script>var SCRIPT = "\nclass Component extends DCLogic {\n  constructor(props) {\n    super(props);\n    this.state = {\n      screen: 'welcome', prev: 'home',\n      food: 2, fish: ['peach', 'tang', 'peach', 'tang'], unlockIdx: 0,\n      decor: [], calm: false, calmUnlocked: false, feeding: false,\n      meal: null, mood: null, helped: [],\n      tech: 'breathe', toast: null, unlock: null,\n      invitee: null,\n      questions: ['Is it okay to have dessert when I eat out with friends?', 'What can I do when evenings feel hard?'],\n      draft: '',\n      share: { mood: true, journal: false, pool: true }\n    };\n    var p = props && props.preset;\n    var homeBase = { screen: 'home', fish: ['peach', 'tang', 'peach', 'tang', 'blush', 'moon'], unlockIdx: 2, decor: ['table'], calmUnlocked: true, food: 3 };\n    var presets = {\n      welcome: { screen: 'welcome' },\n      intro: { screen: 'intro' },\n      home: homeBase,\n      checkin: { screen: 'checkin', meal: 'Lunch', mood: 'okay', helped: ['Eating with someone', 'Music'] },\n      distress: { screen: 'checkin', meal: 'Dinner', mood: 'over' },\n      coping: { screen: 'coping', tech: 'breathe' },\n      unlock: Object.assign({}, homeBase, { unlock: { kind: 'jelly', color: '#E4EEFF', stripe: '#FFFFFF', kicker: 'NEW BREED UNLOCKED', title: 'Moon jelly', body: 'Practising a coping technique brought a new breed to your tide pool.' } }),\n      'break': { screen: 'break' },\n      moonlit: Object.assign({}, homeBase, { calm: true, decor: ['table', 'lantern', 'arch'], fish: ['peach', 'tang', 'peach', 'tang', 'blush', 'moon', 'sunny', 'mint'] }),\n      eat: { screen: 'eat', invitee: 'Jun' },\n      care: { screen: 'care' },\n      help: { screen: 'help', prev: 'home' }\n    };\n    if (p && presets[p]) { Object.assign(this.state, presets[p]); }\n  }\n\n  species() {\n    return {\n      peach: { name: 'Peach puff', color: '#FFB38A', stripe: '#FFF4EA', jelly: false },\n      tang: { name: 'Periwinkle tang', color: '#7F95E8', stripe: '#FFD66B', jelly: false },\n      blush: { name: 'Blush guppy', color: '#FF9CC8', stripe: '#FFF0F7', jelly: false },\n      moon: { name: 'Moon jelly', color: '#E4EEFF', stripe: '#FFFFFF', jelly: true },\n      sunny: { name: 'Sunny goby', color: '#FFD66B', stripe: '#FF9F6B', jelly: false },\n      mint: { name: 'Mint wrasse', color: '#8FE3C8', stripe: '#FFFFFF', jelly: false },\n      lilac: { name: 'Lilac jelly', color: '#E2C9FF', stripe: '#FFFFFF', jelly: true }\n    };\n  }\n\n  go(screen) {\n    var prev = this.state.screen;\n    this.setState({ screen: screen, prev: (screen === 'help') ? prev : this.state.prev });\n  }\n\n  showToast(msg) {\n    var self = this;\n    this.setState({ toast: msg });\n    clearTimeout(this._t);\n    this._t = setTimeout(function () { self.setState({ toast: null }); }, 2600);\n  }\n\n  componentWillUnmount() { clearTimeout(this._t); clearTimeout(this._f); }\n\n  chip(sel) {\n    return 'min-height: 44px; padding: 0 16px; border-radius: 999px; font-size: 14px; font-weight: 800; border: 1.5px solid ' +\n      (sel ? '#5068B5; background: #5068B5; color: #FFFFFF' : '#E6DAB4; background: #FFFFFF; color: #2F3A66');\n  }\n\n  renderVals() {\n    var s = this.state, self = this, sp = this.species();\n\n    var fishList = s.fish.map(function (id, i) {\n      var d = sp[id];\n      var scale = 0.85 + ((i * 7) % 5) * 0.09;\n      var dur = 15 + ((i * 5) % 9);\n      return {\n        name: d.name, color: d.color, stripe: d.stripe,\n        isJelly: d.jelly, isFish: !d.jelly,\n        cls: d.jelly ? 'drift' : 'swim',\n        top: (22 + ((i * 37) % 44)) + '%',\n        left: (8 + ((i * 53) % 170)) + 'px',\n        dur: (d.jelly ? dur + 8 : dur) + 's',\n        delay: '-' + ((i * 3.3) % 14).toFixed(1) + 's',\n        w: Math.round(58 * scale), h: Math.round(35 * scale)\n      };\n    });\n\n    var meals = ['Breakfast', 'Lunch', 'Dinner', 'Snack', 'Rather not say'];\n    var mealChips = meals.map(function (m) {\n      return { label: m, sel: s.meal === m, style: self.chip(s.meal === m), pick: function () { self.setState({ meal: m }); } };\n    });\n\n    var moodDefs = [\n      { id: 'calm', label: 'Calm', face: '#CDEFE0', mouth: 'M13 25 C 16 29, 24 29, 27 25' },\n      { id: 'okay', label: 'Okay', face: '#DCE6FB', mouth: 'M14 26 L 26 26' },\n      { id: 'hard', label: 'Hard', face: '#FFE9C7', mouth: 'M13 28 C 16 24, 24 24, 27 28' },\n      { id: 'over', label: 'Overwhelmed', face: '#FFD3E6', mouth: 'M14 27 C 17 24, 20 30, 23 26 C 25 24, 26 27, 27 26' }\n    ];\n    var moods = moodDefs.map(function (m) {\n      var sel = s.mood === m.id;\n      return {\n        label: m.label, face: m.face, mouth: m.mouth, sel: sel,\n        style: 'display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 2px; border-radius: 18px; color: #2F3A66; border: 2px solid ' + (sel ? '#5068B5; background: #EAF0FD' : 'transparent; background: #FFFFFF'),\n        pick: function () { self.setState({ mood: m.id }); }\n      };\n    });\n\n    var helpers = ['Eating with someone', 'Music', 'A plan I made', 'Breathing', 'Something cosy after', 'Nothing today \u2014 that\u2019s okay'];\n    var helpChips = helpers.map(function (h) {\n      var sel = s.helped.indexOf(h) >= 0;\n      return {\n        label: h, sel: sel, style: self.chip(sel),\n        pick: function () {\n          var next = sel ? s.helped.filter(function (x) { return x !== h; }) : s.helped.concat([h]);\n          self.setState({ helped: next });\n        }\n      };\n    });\n\n    var techDefs = [{ id: 'breathe', label: 'Breathe' }, { id: 'ground', label: '5-4-3-2-1' }, { id: 'kind', label: 'Kind words' }];\n    var techs = techDefs.map(function (t) {\n      return { label: t.label, sel: s.tech === t.id, style: self.chip(s.tech === t.id), pick: function () { self.setState({ tech: t.id }); } };\n    });\n\n    var friendDefs = [{ name: 'Aisha', bg: '#FFB3D6' }, { name: 'Jun', bg: '#B9CCF5' }, { name: 'Mum', bg: '#FFE08A' }];\n    var friends = friendDefs.map(function (p) {\n      var sel = s.invitee === p.name;\n      return {\n        name: p.name, bg: p.bg, initial: p.name.charAt(0), sel: sel,\n        style: 'flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 4px; border-radius: 16px; color: #2F3A66; border: 2px solid ' + (sel ? '#5068B5; background: #EAF0FD' : '#F0E6C8; background: #FFFFFF'),\n        pick: function () { self.setState({ invitee: p.name }); }\n      };\n    });\n\n    var shareDefs = [{ id: 'mood', label: 'Check-in summaries' }, { id: 'journal', label: 'Journal entries' }, { id: 'pool', label: 'Tide pool progress' }];\n    var shares = shareDefs.map(function (d) {\n      var on = !!s.share[d.id];\n      return {\n        label: d.label, on: on,\n        track: 'width: 50px; height: 30px; flex: none; border-radius: 999px; position: relative; background: ' + (on ? '#5068B5' : '#CFC6AE'),\n        knob: 'position: absolute; top: 3px; left: ' + (on ? '23px' : '3px') + '; width: 24px; height: 24px; border-radius: 50%; background: #FFFFFF',\n        toggle: function () { var n = Object.assign({}, s.share); n[d.id] = !on; self.setState({ share: n }); }\n      };\n    });\n\n    var navStyle = function (active) {\n      return 'border: 0; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 12px; font-weight: 800; color: ' + (active ? '#3B55A6' : '#6F6A5A');\n    };\n\n    var u = s.unlock || {};\n    var saveOk = !!s.mood;\n    var decorCount = s.decor.length;\n\n    return {\n      isWelcome: s.screen === 'welcome', isIntro: s.screen === 'intro', isHome: s.screen === 'home',\n      isCheckin: s.screen === 'checkin', isCoping: s.screen === 'coping', isBreak: s.screen === 'break',\n      isEat: s.screen === 'eat', isCare: s.screen === 'care', isHelp: s.screen === 'help',\n      showNav: s.screen === 'home' || s.screen === 'eat' || s.screen === 'care',\n\n      goIntro: function () { self.go('intro'); },\n      goHome: function () { self.go('home'); },\n      goCheckin: function () { self.setState({ mood: null, meal: null, helped: [] }); self.go('checkin'); },\n      goCoping: function () { self.go('coping'); },\n      goBreak: function () { self.go('break'); },\n      goEat: function () { self.go('eat'); },\n      goCare: function () { self.go('care'); },\n      goHelp: function () { self.go('help'); },\n      goBack: function () { self.setState({ screen: s.prev || 'home' }); },\n\n      waterBg: s.calm ? '#454A93' : '#9D9BEB',\n      sandColor: s.calm ? '#6E6FAE' : '#D9D2F5',\n      rockColor: s.calm ? '#8A8CC4' : '#EDE8FF',\n      showRays: !s.calm, calm: s.calm, calmUnlocked: s.calmUnlocked,\n      calmLabel: s.calm ? 'Daylight' : 'Moonlit',\n      toggleCalm: function () { self.setState({ calm: !s.calm }); },\n      fishList: fishList,\n      feeding: s.feeding,\n      feedLabel: s.food > 0 ? 'Feed fish \u00b7 ' + s.food + ' left' : 'Check in to earn food',\n      feed: function () {\n        if (s.food <= 0) { self.showToast('Fish food comes from meal check-ins.'); return; }\n        self.setState({ food: s.food - 1, feeding: true });\n        clearTimeout(self._f);\n        self._f = setTimeout(function () { self.setState({ feeding: false }); }, 2600);\n        self.showToast('Your fish are happily munching.');\n      },\n      hasTable: s.decor.indexOf('table') >= 0, hasLantern: s.decor.indexOf('lantern') >= 0, hasArch: s.decor.indexOf('arch') >= 0,\n      poolCount: s.fish.length + ' friends \u00b7 ' + decorCount + ' decorations',\n\n      mealChips: mealChips, moods: moods, helpChips: helpChips,\n      overwhelmed: s.mood === 'over',\n      saveDisabled: !saveOk,\n      saveStyle: 'min-height: 56px; border: 0; border-radius: 18px; font-family: \\'Fredoka\\', sans-serif; font-weight: 600; font-size: 19px; ' + (saveOk ? 'background: #5068B5; color: #FFFFFF' : 'background: #E6DAB4; color: #6F6A5A'),\n      saveCheckin: function () {\n        if (!s.mood) return;\n        self.setState({ food: s.food + 1, screen: 'home' });\n        self.showToast('Check-in saved \u00b7 +1 fish food');\n      },\n\n      techs: techs, techBreathe: s.tech === 'breathe', techGround: s.tech === 'ground', techKind: s.tech === 'kind',\n      finishCoping: function () {\n        var order = ['blush', 'moon', 'sunny', 'mint', 'lilac'];\n        var id = order[s.unlockIdx % order.length];\n        var isNew = s.unlockIdx < order.length;\n        var d = sp[id];\n        self.setState({\n          fish: s.fish.concat([id]), unlockIdx: s.unlockIdx + 1, screen: 'home',\n          unlock: { kind: d.jelly ? 'jelly' : 'fish', color: d.color, stripe: d.stripe,\n            kicker: isNew ? 'NEW BREED UNLOCKED' : 'A NEW FRIEND',\n            title: d.name, body: isNew ? 'Practising a coping technique brought a new breed to your tide pool.' : 'Another ' + d.name.toLowerCase() + ' swam in to keep the others company.' }\n        });\n      },\n\n      finishBreak: function () {\n        if (!s.calmUnlocked) {\n          self.setState({ calmUnlocked: true, calm: true, screen: 'home',\n            unlock: { kind: 'other', kicker: 'PEACEFUL SCENE UNLOCKED', title: 'Moonlit tide pool', body: 'Taking a break is looking after yourself. Switch to moonlight whenever you need a quieter pool.' } });\n        } else {\n          self.setState({ screen: 'home' });\n          self.showToast('Welcome back. Glad you took that pause.');\n        }\n      },\n\n      logShared: function () {\n        var all = [\n          { id: 'table', title: 'Shell picnic table', body: 'Sharing a meal brought a picnic table to your pool \u2014 room for everyone.' },\n          { id: 'lantern', title: 'Lantern coral', body: 'Good company lights things up. A glowing lantern coral now grows in your pool.' },\n          { id: 'arch', title: 'Friendship arch', body: 'An arch for your fish to swim through together, thanks to another shared meal.' }\n        ];\n        var next = all.filter(function (d) { return s.decor.indexOf(d.id) < 0; })[0];\n        if (!next) { self.showToast('Logged \u2014 sharing meals is worth celebrating.'); return; }\n        self.setState({ decor: s.decor.concat([next.id]), screen: 'home',\n          unlock: { kind: 'other', kicker: 'DECORATION UNLOCKED', title: next.title, body: next.body } });\n      },\n\n      friends: friends, hasInvitee: !!s.invitee, invitee: s.invitee || '',\n      sendInvite: function () { self.showToast('Invite sent to ' + s.invitee); self.setState({ invitee: null }); },\n      findSession: function () { self.showToast('In the full app, this opens SGH support activities.'); },\n\n      questions: s.questions.map(function (q) { return { text: q }; }),\n      draft: s.draft,\n      onDraft: function (e) { self.setState({ draft: e.target.value }); },\n      addQuestion: function () {\n        var t = (s.draft || '').trim();\n        if (!t) return;\n        self.setState({ questions: s.questions.concat([t]), draft: '' });\n        self.showToast('Added to your session questions');\n      },\n      shares: shares,\n\n      navHome: navStyle(s.screen === 'home'), navEat: navStyle(s.screen === 'eat'), navCare: navStyle(s.screen === 'care'),\n      navHomeCur: s.screen === 'home' ? 'page' : 'false', navEatCur: s.screen === 'eat' ? 'page' : 'false', navCareCur: s.screen === 'care' ? 'page' : 'false',\n\n      hasToast: !!s.toast, toast: s.toast || '',\n      hasUnlock: !!s.unlock,\n      unlockFish: u.kind === 'fish', unlockJelly: u.kind === 'jelly', unlockOther: u.kind === 'other',\n      unlockColor: u.color || '#FFB38A', unlockStripe: u.stripe || '#FFFFFF',\n      unlockKicker: u.kicker || '', unlockTitle: u.title || '', unlockBody: u.body || '',\n      closeUnlock: function () { self.setState({ unlock: null }); }\n    };\n  }\n}\n";
+(function(){
+  var app = document.getElementById('app');
+  var inst;
+  function DCLogic(props){ this.props = props || {}; this.state = {}; }
+  DCLogic.prototype.setState = function(s){ Object.assign(this.state, typeof s === 'function' ? s(this.state) : s); schedule(); };
+  DCLogic.prototype.forceUpdate = function(){ schedule(); };
+  var Component = new Function('DCLogic', SCRIPT + '\nreturn Component;')(DCLogic);
+
+  function look(path, scopes){
+    path = path.trim();
+    if (path === 'true') return true; if (path === 'false') return false;
+    var parts = path.split('.');
+    for (var i = 0; i < scopes.length; i++) { var sc = scopes[i];
+      if (sc && Object.prototype.hasOwnProperty.call(sc, parts[0])) { var v = sc[parts[0]];
+        for (var j = 1; j < parts.length; j++) v = v == null ? v : v[parts[j]]; return v; } }
+    return undefined;
+  }
+  function interp(s, scopes){ return s.replace(/\{\{([^}]+)\}\}/g, function(_, p){ var v = look(p, scopes); return v == null ? '' : String(v); }); }
+  var EVT = { onclick: 'click', onchange: 'input' };
+  function build(node, scopes, parent){
+    if (node.nodeType === 3) { parent.appendChild(document.createTextNode(interp(node.textContent, scopes))); return; }
+    if (node.nodeType !== 1) return;
+    var tag = node.localName;
+    if (tag === 'sc-if') { if (look(node.getAttribute('value').replace(/[{}]/g, ''), scopes)) node.childNodes.forEach(function(c){ build(c, scopes, parent); }); return; }
+    if (tag === 'sc-for') { var list = look(node.getAttribute('list').replace(/[{}]/g, ''), scopes) || []; var as = node.getAttribute('as');
+      list.forEach(function(it, i){ var o = {}; o[as] = it; o.$index = i; var sc = [o].concat(scopes); node.childNodes.forEach(function(c){ build(c, sc, parent); }); }); return; }
+    var el = node.cloneNode(false); el._h = {};
+    Array.from(node.attributes).forEach(function(a){
+      var n = a.name.toLowerCase();
+      if (n.indexOf('hint-') === 0) { el.removeAttribute(a.name); return; }
+      if (EVT[n]) { el.removeAttribute(a.name); var f = look(a.value.replace(/[{}]/g, ''), scopes); if (typeof f === 'function') el._h[EVT[n]] = f; return; }
+      var whole = a.value.match(/^\{\{([^}]+)\}\}$/);
+      if (whole) { var v = look(whole[1], scopes);
+        if (n.indexOf('aria-') === 0) el.setAttribute(a.name, v === true ? 'true' : (v === false || v == null ? 'false' : String(v)));
+        else if (v === false || v == null) el.removeAttribute(a.name);
+        else el.setAttribute(a.name, v === true ? '' : String(v)); }
+      else if (a.value.indexOf('{{') >= 0) el.setAttribute(a.name, interp(a.value, scopes));
+    });
+    node.childNodes.forEach(function(c){ build(c, scopes, el); });
+    parent.appendChild(el);
+  }
+  function patch(a, b){
+    // a: live node, b: freshly built node. Keep a where possible so animations and focus survive.
+    if (a.nodeType !== b.nodeType || a.nodeName !== b.nodeName) { a.parentNode.replaceChild(b, a); return; }
+    if (a.nodeType === 3) { if (a.textContent !== b.textContent) a.textContent = b.textContent; return; }
+    Array.from(a.attributes).forEach(function(at){ if (!b.hasAttribute(at.name)) a.removeAttribute(at.name); });
+    Array.from(b.attributes).forEach(function(at){ if (a.getAttribute(at.name) !== at.value) a.setAttribute(at.name, at.value); });
+    a._h = b._h;
+    if (a.localName === 'input' && document.activeElement !== a) { var v = b.getAttribute('value') || ''; if (a.value !== v) a.value = v; }
+    if (a.localName === 'button') a.disabled = b.hasAttribute('disabled');
+    var ak = Array.from(a.childNodes), bk = Array.from(b.childNodes);
+    for (var i = 0; i < bk.length; i++) { if (i < ak.length) patch(ak[i], bk[i]); else a.appendChild(bk[i]); }
+    for (var j = bk.length; j < ak.length; j++) a.removeChild(ak[j]);
+  }
+  var tplRoot = document.getElementById('tpl').content;
+  var pending = false, lastScreen = null;
+  function render(){
+    pending = false;
+    var frag = document.createElement('div');
+    var vals = inst.renderVals();
+    tplRoot.childNodes.forEach(function(c){ build(c, [vals], frag); });
+    if (!app.firstChild) { while (frag.firstChild) app.appendChild(frag.firstChild); }
+    else patch(app, Object.assign(frag, {}), true);
+    if (inst.state.screen !== lastScreen) {
+      lastScreen = inst.state.screen;
+      app.querySelectorAll('[style*="overflow-y: auto"]').forEach(function(e){ e.scrollTop = 0; });
+    }
+  }
+  function schedule(){ if (!pending) { pending = true; Promise.resolve().then(render); } }
+  function dispatch(type, e){
+    var n = e.target;
+    while (n && n !== app) { if (n._h && n._h[type]) { if (n.disabled) return; n._h[type](e); return; } n = n.parentNode; }
+  }
+  app.addEventListener('click', function(e){ dispatch('click', e); });
+  app.addEventListener('input', function(e){ dispatch('input', e); });
+  app.addEventListener('keydown', function(e){
+    if (e.key === 'Enter' && e.target.id === 'qinput') { var add = e.target.parentNode.querySelector('button'); if (add) add.click(); }
+  });
+  inst = new Component({});
+  // patch() needs app's own attributes untouched: build into a clone shell
+  var origPatch = patch;
+  patch = function(a, b, isRoot){
+    if (isRoot) { var ak = Array.from(a.childNodes), bk = Array.from(b.childNodes);
+      for (var i = 0; i < bk.length; i++) { if (i < ak.length) origPatch(ak[i], bk[i]); else a.appendChild(bk[i]); }
+      for (var j = bk.length; j < ak.length; j++) a.removeChild(ak[j]); return; }
+    origPatch(a, b);
+  };
+  render();
+})();
+</script>
+
+</body>
+</html>
